@@ -252,3 +252,130 @@ Played via the Web Audio API through the `useAudio` hook — no Web Speech API.
 - CMU dictionary covers English only — other source language translation not yet supported
 - No cross-device sync (localStorage is per-browser by design for now)
 - Shareable alphabet links (encode alphabet as URL param) would be a good v2 feature
+
+---
+
+## Container State and Prop Interfaces
+
+### General conventions
+- Sub-components receive only the props they actually need — never the whole alphabet object when a subset will do
+- Callback props are named on + verb + noun — e.g. onSave, onSelectPhoneme, onGenerate
+- Data props use plain descriptive nouns — e.g. glyphs, selectedPhoneme, wordList
+- AlphabetSelector is rendered at the top of AlphabetBuilder and PhonemeMapper containers only — not in App.jsx and not in LexiconGenerator or Translator (those screens use whichever alphabet is active without letting the user switch mid-task)
+
+### AlphabetBuilder
+
+Local state:
+  selectedGlyphId: string | null   // which saved glyph is loaded into the canvas for redrawing, null if drawing a new one
+
+Props passed to DrawingCanvas:
+  initialImage: string | null        // base64 PNG of the selected glyph, or null for a blank canvas
+  onSave: (imageData: string) => void  // called with base64 PNG when user hits Save
+  onClear: () => void                // called when user hits Clear — resets selectedGlyphId in container
+
+Props passed to GlyphLibrary:
+  glyphs: Glyph[]                         // all glyphs in the active alphabet
+  selectedGlyphId: string | null          // highlights the currently loaded glyph
+  onSelectGlyph: (glyphId: string) => void  // loads that glyph into the canvas for redrawing
+  onDeleteGlyph: (glyphId: string) => void  // removes the glyph from the alphabet
+
+Props passed to AlphabetSelector:
+  alphabets: Alphabet[]
+  activeAlphabetId: string
+  onSwitch: (alphabetId: string) => void
+  onCreate: (name: string) => void
+  onRename: (alphabetId: string, name: string) => void
+  onDelete: (alphabetId: string) => void
+  onExport: () => void
+  onImport: (file: File) => void
+
+### PhonemeMapper
+
+Local state:
+  browseMode: "ipa" | "character"       // which browser is shown, toggled at the top
+  selectedIPASymbols: string[]          // the phoneme(s) currently selected, ready to assign
+  selectedAlphabetId: string | null     // which Unicode writing system is selected in CharacterBrowser
+  selectedGlyphId: string | null        // which glyph in MappingPanel is being assigned to
+
+Props passed to IPABrowser:
+  selectedSymbols: string[]                      // currently selected IPA symbols, shown as highlighted
+  onSelectSymbol: (symbol: string) => void       // adds or toggles a symbol in selectedIPASymbols
+  onPlayPhoneme: (symbol: string) => void        // triggers audio playback via useAudio
+
+Props passed to CharacterBrowser:
+  selectedAlphabetId: string | null
+  selectedSymbols: string[]
+  onSelectAlphabet: (alphabetId: string) => void
+  onSelectPhonemes: (phonemes: string[], label: string) => void
+  onPlayPhoneme: (symbol: string) => void
+
+Props passed to MappingPanel:
+  glyphs: Glyph[]
+  selectedGlyphId: string | null
+  onSelectGlyph: (glyphId: string) => void
+  onAssignPhonemes: (glyphId: string, phonemes: string[], label: string) => void
+
+Props passed to AlphabetSelector: same interface as in AlphabetBuilder.
+
+### LexiconGenerator
+
+Local state:
+  selectedLanguageId: string     // default "english"
+  wordCount: number              // default 40, range 10-150
+  wordList: GeneratedWord[]      // output of generateLexicon(), empty until first generation
+
+GeneratedWord shape:
+  rank: number
+  phonemes: string[]
+  frequencyWeight: number        // 0-1, used for opacity
+  relativeFrequency: number      // per-thousand, shown as a label
+
+Props passed to LanguageSelector:
+  selectedLanguageId: string
+  onSelectLanguage: (languageId: string) => void
+
+Props passed to WordGrid:
+  wordList: GeneratedWord[]
+  glyphs: Glyph[]
+  findGlyphByPhoneme: (phoneme: string) => Glyph | null
+
+Note: LexiconGenerator container directly calls generateLexicon(activeAlphabet, languageProfile, wordCount) from utils/lexiconGenerator.js and holds the result in wordList state. The Generate button and word count slider live in the container itself, not in a sub-component.
+
+### Translator
+
+Local state:
+  inputText: string
+  translationResult: { original: string, phonemes: string[], approximate: boolean }[] | null
+  isTranslating: boolean
+  error: string | null
+
+Props passed to TextInput:
+  value: string
+  onChange: (text: string) => void
+  onTranslate: () => void
+  isTranslating: boolean
+
+Props passed to ScriptOutput:
+  translationResult: TranslationResult[] | null
+  findGlyphByPhoneme: (phoneme: string) => Glyph | null
+  showApproximateIndicator: true
+
+### shared/AlphabetSelector
+
+Fully self-contained UI. Renders a dropdown to switch alphabets, buttons to create/rename/delete the active alphabet with confirmation on delete, and export/import buttons. Manages no state itself — all actions fire callbacks to the container.
+
+### shared/GlyphRenderer
+
+Renders a single glyph image or falls back to raw IPA text if no image exists.
+
+  glyph: Glyph | null
+  phoneme: string           // fallback label if glyph is null or has no image
+  size: number              // width and height in px, default 48
+
+### shared/AudioButton
+
+Play button for a single IPA sound. Used in IPABrowser and CharacterBrowser.
+
+  phoneme: string
+  onPlay: (phoneme: string) => void
+  isLoading: boolean

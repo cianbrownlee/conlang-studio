@@ -169,3 +169,52 @@ export function generateLexicon(activeAlphabet, languageProfile, wordCount) {
     };
   });
 }
+
+/**
+ * Samples words from a generated lexicon using Zipf frequency weights, then
+ * groups them into sentences of random length (5–9 words each).
+ * Common words appear more often — the result feels like natural-frequency text.
+ *
+ * @param {Object[]} wordList - output of generateLexicon()
+ * @param {number} targetWordCount - approximate total words to sample
+ * @returns {Object[][]} - array of sentences, each sentence an array of word objects
+ */
+export function sampleTextFromLexicon(wordList, targetWordCount = 64) {
+  if (!wordList || wordList.length === 0) return [];
+
+  // Build cumulative weight array for weighted random selection
+  const cumulative = [];
+  let total = 0;
+  for (const word of wordList) {
+    total += word.frequencyWeight;
+    cumulative.push(total);
+  }
+
+  /** Picks one word from wordList using frequency weights. */
+  function pickWord() {
+    const r = Math.random() * total;
+    for (let i = 0; i < cumulative.length; i++) {
+      if (r <= cumulative[i]) return wordList[i];
+    }
+    return wordList[wordList.length - 1];
+  }
+
+  const sentences = [];
+  let wordsRemaining = targetWordCount;
+
+  while (wordsRemaining > 0) {
+    // Sentence length: 5–9 words, but don't exceed what's left
+    const sentenceLength = Math.min(
+      5 + Math.floor(Math.random() * 5),
+      wordsRemaining
+    );
+    const sentence = [];
+    for (let i = 0; i < sentenceLength; i++) {
+      sentence.push(pickWord());
+    }
+    sentences.push(sentence);
+    wordsRemaining -= sentenceLength;
+  }
+
+  return sentences;
+}

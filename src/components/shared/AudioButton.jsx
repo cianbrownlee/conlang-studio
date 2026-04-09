@@ -1,6 +1,15 @@
-// Play button that triggers a single IPA audio sample via the useAudio hook
+// Play button for a single IPA audio sample. Used in IPABrowser and CharacterBrowser.
 
-/** AudioButton.jsx — stub */
-export default function AudioButton() {
-  return <div>AudioButton — stub</div>;
+export default function AudioButton({ phoneme, onPlay, isLoading }) {
+  return (
+    <button
+      className={`audio-button${isLoading ? " audio-button--loading" : ""}`}
+      onClick={() => onPlay(phoneme)}
+      disabled={isLoading}
+      title={`Play /${phoneme}/`}
+      aria-label={`Play sound for /${phoneme}/`}
+    >
+      {isLoading ? "…" : "▶"}
+    </button>
+  );
 }

@@ -15,7 +15,7 @@
  *   // => [{ original: "hello", phonemes: ["h","ə","l","oʊ"] }, ...]
  */
 
-import cmuDict from "cmu-pronouncing-dictionary";
+import { dictionary as cmuDict } from "cmu-pronouncing-dictionary";
 
 // ---------------------------------------------------------------------------
 // ARPABET → IPA CONVERSION TABLE
@@ -184,4 +184,55 @@ export function convertTextToPhonemes(text) {
 export function convertWordToPhonemes(word) {
   const result = convertTextToPhonemes(word);
   return result[0] ?? { phonemes: [], approximate: true };
+}
+
+// ---------------------------------------------------------------------------
+// IPA → READABLE LATIN ROMANIZATION
+// Maps IPA symbols to approximate English-readable spellings.
+// Used in the Lexicon Generator to show a pronounceable form alongside glyphs.
+// ---------------------------------------------------------------------------
+
+const IPA_TO_LATIN = {
+  // Affricates
+  "tʃ": "ch",  "dʒ": "j",   "ts": "ts",  "tʂ": "ch",  "tɕ": "ch",
+  // Diphthongs
+  "eɪ": "ay",  "aɪ": "eye", "ɔɪ": "oy",  "aʊ": "ow",  "oʊ": "oh",
+  "ɪə": "ear", "eə": "air", "ʊə": "ure",
+  // Vowels
+  "i":  "ee",  "ɪ":  "i",   "e":  "ay",  "ɛ":  "e",   "æ":  "a",
+  "ə":  "uh",  "ʌ":  "uh",  "ɑ":  "ah",  "ɒ":  "o",   "ɔ":  "aw",
+  "ʊ":  "oo",  "u":  "oo",  "a":  "a",   "o":  "o",   "ɜ":  "er",
+  "y":  "ü",   "ɨ":  "i",   "ɯ":  "u",   "ø":  "eu",  "ɐ":  "a",
+  "ɘ":  "e",   "ɵ":  "o",   "ɤ":  "u",   "œ":  "eu",  "ɞ":  "o",
+  "ɶ":  "o",   "ä":  "a",   "e̞":  "e",   "o̞":  "o",
+  // Plosives
+  "p":  "p",   "b":  "b",   "t":  "t",   "d":  "d",   "k":  "k",
+  "ɡ":  "g",   "g":  "g",   "q":  "q",   "ʔ":  "",
+  // Nasals
+  "m":  "m",   "n":  "n",   "ŋ":  "ng",  "ɲ":  "ny",  "ɳ":  "n",
+  "ɴ":  "ng",  "ɱ":  "m",
+  // Fricatives
+  "f":  "f",   "v":  "v",   "θ":  "th",  "ð":  "dh",  "s":  "s",
+  "z":  "z",   "ʃ":  "sh",  "ʒ":  "zh",  "h":  "h",   "x":  "kh",
+  "ɣ":  "gh",  "ħ":  "hh",  "ʕ":  "a",   "χ":  "kh",  "ʁ":  "r",
+  "β":  "v",   "ç":  "sh",  "ɸ":  "f",   "ʂ":  "sh",  "ʐ":  "zh",
+  // Approximants & laterals
+  "ɹ":  "r",   "r":  "r",   "ɾ":  "r",   "ʀ":  "r",   "j":  "y",
+  "w":  "w",   "l":  "l",   "ʎ":  "ly",  "ɭ":  "l",
+  // Trills & clicks (approximate)
+  "ʙ":  "b",   "ɽ":  "r",   "ǀ":  "t",   "ǃ":  "k",
+};
+
+/**
+ * Converts an array of IPA phoneme symbols to a readable Latin romanization.
+ * Each phoneme is looked up in IPA_TO_LATIN; unknowns are passed through as-is.
+ * The result is a single lowercase string an English speaker can sound out.
+ *
+ * @param {string[]} phonemes - array of IPA symbols e.g. ["dʒ", "ə", "n"]
+ * @returns {string} - e.g. "juhn"
+ */
+export function convertIPAToLatin(phonemes) {
+  return phonemes
+    .map((p) => (p in IPA_TO_LATIN ? IPA_TO_LATIN[p] : p))
+    .join("");
 }

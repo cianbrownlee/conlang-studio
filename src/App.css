@@ -135,3 +135,980 @@
   line-height: 1.8;
   font-size: 0.95rem;
 }
+
+/* ---------------------------------------------------------------------------
+   SCREEN BASE
+   Shared by all four tab screens.
+--------------------------------------------------------------------------- */
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* ---------------------------------------------------------------------------
+   TOGGLE BUTTON
+   Used for Browse by IPA / Browse by Character mode switch.
+--------------------------------------------------------------------------- */
+
+.toggle-btn {
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.toggle-btn:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+}
+
+.toggle-btn--active {
+  background: var(--color-accent-dim);
+  border-color: var(--color-accent-dim);
+  color: var(--color-accent);
+}
+
+/* ---------------------------------------------------------------------------
+   BUTTON ICON VARIANT
+   Small square button for +, ✎, ✕ actions.
+--------------------------------------------------------------------------- */
+
+.button--icon {
+  padding: 5px 9px;
+  font-size: 0.9rem;
+  line-height: 1;
+  min-width: 30px;
+  justify-content: center;
+}
+
+.button--small {
+  padding: 3px 10px;
+  font-size: 0.75rem;
+}
+
+/* ---------------------------------------------------------------------------
+   ALPHABET SELECTOR
+   Reusable dropdown + action buttons rendered at the top of Builder and Mapper.
+--------------------------------------------------------------------------- */
+
+.alphabet-selector {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.alphabet-selector__main-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.alphabet-selector__dropdown {
+  flex: 1;
+  min-width: 160px;
+  max-width: 280px;
+  font-size: 0.85rem;
+  padding: 6px 28px 6px 10px;
+}
+
+.alphabet-selector__file-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ---------------------------------------------------------------------------
+   AUDIO BUTTON
+   Small ▶ play button for IPA sound samples.
+--------------------------------------------------------------------------- */
+
+.audio-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-subtle);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.6rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.audio-button:hover {
+  background: var(--color-bg-raised);
+  color: var(--color-accent);
+  border-color: var(--color-accent-dim);
+}
+
+.audio-button--loading {
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------------
+   GLYPH RENDERER
+   Renders a glyph image or IPA text fallback.
+--------------------------------------------------------------------------- */
+
+.glyph-renderer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.glyph-renderer--image {
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+}
+
+.glyph-renderer--ipa {
+  font-family: var(--font-mono);
+  color: #e8c76a;
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  text-align: center;
+  line-height: 1;
+}
+
+/* ---------------------------------------------------------------------------
+   ALPHABET BUILDER
+--------------------------------------------------------------------------- */
+
+.alphabet-builder__panel-heading {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.alphabet-builder__workspace {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  .alphabet-builder__workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   DRAWING CANVAS
+--------------------------------------------------------------------------- */
+
+.drawing-canvas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.drawing-canvas__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.drawing-canvas__stroke-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.drawing-canvas__stroke-slider {
+  width: 90px;
+}
+
+.drawing-canvas__stroke-value {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  min-width: 28px;
+}
+
+.drawing-canvas__canvas {
+  width: 100%;
+  max-width: 300px;
+  aspect-ratio: 1;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.drawing-canvas__canvas:hover {
+  border-color: var(--color-border-strong);
+}
+
+.drawing-canvas__save-btn {
+  align-self: flex-start;
+}
+
+/* ---------------------------------------------------------------------------
+   GLYPH LIBRARY
+--------------------------------------------------------------------------- */
+
+.glyph-library--empty {
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.glyph-library__empty-message {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.glyph-library__heading {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.glyph-library__count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.glyph-library__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: var(--space-2);
+}
+
+.glyph-library__item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-surface);
+  padding: var(--space-2);
+  transition: border-color var(--transition-fast);
+}
+
+.glyph-library__item:hover {
+  border-color: var(--color-border-default);
+}
+
+.glyph-library__item--selected {
+  border-color: var(--color-accent-dim);
+  background: rgba(201, 168, 76, 0.05);
+}
+
+.glyph-library__select-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.glyph-library__phoneme-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--color-accent);
+  background: var(--color-accent-dim);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+
+.glyph-library__delete-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  font-size: 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.glyph-library__item:hover .glyph-library__delete-btn {
+  opacity: 1;
+}
+
+.glyph-library__delete-btn:hover {
+  color: var(--color-danger);
+}
+
+/* ---------------------------------------------------------------------------
+   PHONEME MAPPER
+--------------------------------------------------------------------------- */
+
+.phoneme-mapper__mode-toggle {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.phoneme-mapper__selection-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid var(--color-accent-dim);
+  border-radius: var(--radius-md);
+}
+
+.phoneme-mapper__selection-label {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-accent);
+}
+
+.phoneme-mapper__workspace {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: var(--space-6);
+  align-items: start;
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .phoneme-mapper__workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+.phoneme-mapper__browser-panel {
+  min-width: 0;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.phoneme-mapper__mapping-panel {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+/* ---------------------------------------------------------------------------
+   IPA BROWSER
+--------------------------------------------------------------------------- */
+
+.ipa-browser__tabs {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-border-subtle);
+  scrollbar-width: none;
+}
+
+.ipa-browser__tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.ipa-browser__tab {
+  padding: 9px 14px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.ipa-browser__tab:hover {
+  color: var(--color-text-secondary);
+}
+
+.ipa-browser__tab--active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+.ipa-browser__symbols {
+  display: flex;
+  flex-direction: column;
+  max-height: 560px;
+  overflow-y: auto;
+  padding: var(--space-2);
+  gap: 2px;
+}
+
+.ipa-symbol {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.ipa-symbol:hover {
+  background: var(--color-bg-raised);
+}
+
+.ipa-symbol--selected {
+  background: rgba(201, 168, 76, 0.08);
+  border-color: var(--color-accent-dim);
+}
+
+.ipa-symbol__pick-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  min-width: 0;
+}
+
+.ipa-symbol__char {
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  color: var(--color-text-primary);
+  min-width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ipa-symbol--selected .ipa-symbol__char {
+  color: var(--color-accent);
+}
+
+.ipa-symbol__desc {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------------------------------------------------------------------------
+   CHARACTER BROWSER
+--------------------------------------------------------------------------- */
+
+.character-browser {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.character-browser__system-select {
+  margin: var(--space-3);
+  width: calc(100% - var(--space-6));
+  font-size: 0.82rem;
+}
+
+.character-browser__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.char-entry {
+  position: relative;
+}
+
+.char-entry__char-btn {
+  width: 100%;
+  aspect-ratio: 1;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-raised);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.char-entry__char-btn:hover {
+  background: var(--color-bg-overlay);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-default);
+}
+
+.char-entry--mapped .char-entry__char-btn {
+  border-color: var(--color-accent-dim);
+  color: var(--color-accent);
+  background: rgba(201, 168, 76, 0.06);
+}
+
+.char-entry--expanded .char-entry__char-btn {
+  background: var(--color-bg-overlay);
+  border-color: var(--color-accent-dim);
+}
+
+/* Phoneme list drops below the character on expand */
+.char-entry__phoneme-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 20;
+  background: var(--color-bg-overlay);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  min-width: 160px;
+  overflow: hidden;
+}
+
+.char-entry__phoneme-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  transition: background var(--transition-fast);
+}
+
+.char-entry__phoneme-row:hover {
+  background: var(--color-bg-raised);
+}
+
+.char-entry__phoneme-row--selected {
+  background: rgba(201, 168, 76, 0.08);
+}
+
+.char-entry__phoneme-pick {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  text-align: left;
+}
+
+.char-entry__phoneme-symbol {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-text-primary);
+}
+
+.char-entry__phoneme-default-mark {
+  font-size: 0.65rem;
+  color: var(--color-accent);
+}
+
+/* ---------------------------------------------------------------------------
+   MAPPING PANEL
+--------------------------------------------------------------------------- */
+
+.mapping-panel--empty {
+  padding: var(--space-8);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.mapping-panel__heading {
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.mapping-panel__hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-3);
+  line-height: 1.5;
+}
+
+.mapping-panel__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  gap: var(--space-2);
+}
+
+.mapping-panel__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-bg-raised);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.mapping-panel__item:hover {
+  border-color: var(--color-border-default);
+}
+
+.mapping-panel__item--selected {
+  border-color: var(--color-accent-dim);
+  background: rgba(201, 168, 76, 0.05);
+}
+
+.mapping-panel__item--mapped {
+  border-color: var(--color-border-default);
+}
+
+.mapping-panel__glyph-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.mapping-panel__badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--color-accent);
+  background: var(--color-accent-dim);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+}
+
+.mapping-panel__badge--empty {
+  color: var(--color-text-muted);
+  background: transparent;
+}
+
+/* ---------------------------------------------------------------------------
+   LEXICON GENERATOR
+--------------------------------------------------------------------------- */
+
+.lexicon-generator__controls {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.lexicon-generator__word-count {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lexicon-generator__count-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.lexicon-generator__count-label strong {
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+}
+
+.lexicon-generator__count-slider {
+  width: 160px;
+}
+
+.lexicon-generator__nudge {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+   LANGUAGE SELECTOR
+--------------------------------------------------------------------------- */
+
+.language-selector {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.language-selector__label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+}
+
+.language-selector__select {
+  max-width: 260px;
+  font-size: 0.82rem;
+}
+
+.language-selector__hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  max-width: 320px;
+}
+
+/* ---------------------------------------------------------------------------
+   WORD GRID
+--------------------------------------------------------------------------- */
+
+.word-grid--empty {
+  padding: var(--space-10);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+.word-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.word-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.word-entry:hover {
+  border-color: var(--color-border-default);
+}
+
+.word-entry__glyphs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.word-entry__roman {
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  color: #e8c76a;
+  letter-spacing: 0.04em;
+  margin-top: var(--space-1);
+}
+
+.word-entry__ipa {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--color-text-secondary);
+}
+
+/* ---------------------------------------------------------------------------
+   TEXT SAMPLE (Lexicon Generator)
+--------------------------------------------------------------------------- */
+
+.text-sample {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.text-sample__heading {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.text-sample__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.text-sample__section-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Script section: glyphs flow inline like text */
+.text-sample__script {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: flex-end;
+  line-height: 1;
+}
+
+.text-sample__sentence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: flex-end;
+}
+
+.text-sample__word {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+/* Phonetic and romanized: serif gold, readable */
+.text-sample__phonetic {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  line-height: 1.9;
+}
+
+.text-sample__romanized {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  color: #e8c76a;
+  line-height: 1.9;
+  letter-spacing: 0.02em;
+}
+
+/* ---------------------------------------------------------------------------
+   TRANSLATOR
+--------------------------------------------------------------------------- */
+
+.translator__nudge {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-surface);
+  border-radius: var(--radius-md);
+  border-left: 2px solid var(--color-accent-dim);
+}
+
+.translator__error {
+  font-size: 0.85rem;
+  color: var(--color-danger);
+  padding: var(--space-3) var(--space-4);
+  background: rgba(192, 64, 64, 0.08);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(192, 64, 64, 0.3);
+}
+
+/* ---------------------------------------------------------------------------
+   TEXT INPUT (Translator)
+--------------------------------------------------------------------------- */
+
+.text-input {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 680px;
+}
+
+.text-input__label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.05em;
+}
+
+.text-input__area {
+  resize: vertical;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  font-family: var(--font-sans);
+}
+
+.text-input__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.text-input__shortcut-hint {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+   SCRIPT OUTPUT (Translator)
+--------------------------------------------------------------------------- */
+
+.script-output--empty {
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  padding: var(--space-6) 0;
+}
+
+.script-output {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: flex-start;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.script-word {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  position: relative;
+}
+
+.script-word--approximate {
+  border-color: var(--color-border-default);
+  opacity: 0.8;
+}
+
+.script-word__glyphs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.script-word__original {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+
+.script-word__ipa {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+}
+
+.script-word__approximate-mark {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-mono);
+}
