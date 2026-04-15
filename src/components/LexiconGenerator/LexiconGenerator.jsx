@@ -24,6 +24,7 @@ export default function LexiconGenerator({
   onSelectLanguage,
 }) {
   const [wordCount, setWordCount] = useState(40);
+  const [sampleLength, setSampleLength] = useState(64);
   const [wordList, setWordList] = useState([]);
   const [textSample, setTextSample] = useState([]);
 
@@ -37,7 +38,7 @@ export default function LexiconGenerator({
     if (!profile) return;
     const result = generateLexicon(activeAlphabet, profile, wordCount);
     setWordList(result);
-    setTextSample(sampleTextFromLexicon(result));
+    setTextSample(sampleTextFromLexicon(result, sampleLength));
   }
 
   return (
@@ -65,7 +66,7 @@ export default function LexiconGenerator({
 
         <div className="lexicon-generator__word-count">
           <label htmlFor="word-count-slider" className="lexicon-generator__count-label">
-            Words: <strong>{wordCount}</strong>
+            Vocabulary: <strong>{wordCount}</strong>
           </label>
           <input
             id="word-count-slider"
@@ -75,6 +76,22 @@ export default function LexiconGenerator({
             step={5}
             value={wordCount}
             onChange={(e) => setWordCount(Number(e.target.value))}
+            className="lexicon-generator__count-slider"
+          />
+        </div>
+
+        <div className="lexicon-generator__word-count">
+          <label htmlFor="sample-length-slider" className="lexicon-generator__count-label">
+            Sample length: <strong>{sampleLength}</strong>
+          </label>
+          <input
+            id="sample-length-slider"
+            type="range"
+            min={20}
+            max={200}
+            step={4}
+            value={sampleLength}
+            onChange={(e) => setSampleLength(Number(e.target.value))}
             className="lexicon-generator__count-slider"
           />
         </div>

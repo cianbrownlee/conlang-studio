@@ -19,6 +19,16 @@ import { IPA_SYMBOLS } from "../data/ipa";
 import { pickWordStructure, filterPhonemesForSlot } from "./syllableTemplates";
 
 // ---------------------------------------------------------------------------
+// CONSTANTS
+// ---------------------------------------------------------------------------
+
+// Consonants that can appear as the second C in an onset cluster in most
+// European/sonorant-cluster languages (bl, br, tr, dr, fl, fr, kl, kr, etc.)
+// Languages with "sonorant" onsetClusterMode restrict to this set for the
+// second onset consonant. "free" mode skips this filter entirely.
+const ONSET_SECOND_C = new Set(["l", "r", "ɹ", "ɾ", "w", "j", "ʎ"]);
+
+// ---------------------------------------------------------------------------
 // HELPERS
 // ---------------------------------------------------------------------------
 
@@ -72,22 +82,48 @@ function weightedRandomPick(weightMap, candidates) {
  * @param {Object} weightMap - filtered phoneme weights for this language + alphabet
  * @param {string[]} allPhonemes - all phonemes available in the user's alphabet
  * @param {string[]} syllableTemplates - template array from the language profile
+ * @param {string} onsetClusterMode - "sonorant" | "free" (default "sonorant")
  * @returns {string[]|null}
  */
-function generateWord(weightMap, allPhonemes, syllableTemplates) {
+function generateWord(weightMap, allPhonemes, syllableTemplates, onsetClusterMode = "sonorant") {
   const structure = pickWordStructure(syllableTemplates);
   const phonemes = [];
 
   for (const syllable of structure) {
-    for (const slotType of syllable) {
-      const candidates = filterPhonemesForSlot(allPhonemes, slotType, isVowel);
+    // Track onset context: consonants before the first vowel in this syllable
+    let vowelSeen = false;
+    let prevOnsetConsonant = null;
 
-      // If no candidates exist for this slot type, skip the slot
-      // (e.g. alphabet has no vowels yet — degrade gracefully)
+    for (const slotType of syllable) {
+      let candidates = filterPhonemesForSlot(allPhonemes, slotType, isVowel);
+
+      // If no candidates exist for this slot type, skip it gracefully
       if (candidates.length === 0) continue;
 
+      if (slotType === "consonant" && !vowelSeen && prevOnsetConsonant !== null) {
+        // This is the second (or later) consonant in an onset cluster.
+        // Apply language-specific cluster restrictions.
+        if (onsetClusterMode === "sonorant") {
+          // Restrict to liquids/glides (l, r, w, j…) — gives bl, br, tr, fl, etc.
+          // Fall through to full set if the user's alphabet has no sonorants.
+          const sonorants = candidates.filter((c) => ONSET_SECOND_C.has(c));
+          if (sonorants.length > 0) candidates = sonorants;
+        }
+        // Always prevent geminates (tt, ss, etc.) regardless of mode
+        const noGeminate = candidates.filter((c) => c !== prevOnsetConsonant);
+        if (noGeminate.length > 0) candidates = noGeminate;
+      }
+
       const picked = weightedRandomPick(weightMap, candidates);
-      if (picked) phonemes.push(picked);
+      if (picked) {
+        phonemes.push(picked);
+        if (slotType === "vowel") {
+          vowelSeen = true;
+          prevOnsetConsonant = null;
+        } else if (slotType === "consonant" && !vowelSeen) {
+          prevOnsetConsonant = picked;
+        }
+      }
     }
   }
 
@@ -129,17 +165,22 @@ function zipfWeight(rank, totalWords) {
  * }[]}
  */
 export function generateLexicon(activeAlphabet, languageProfile, wordCount) {
-  // Extract the IPA phonemes the user has actually mapped
-  const availablePhonemes = activeAlphabet.glyphs
-    .filter((g) => g.phonemes && g.phonemes.length > 0)
-    .flatMap((g) => g.phonemes);
+  // Extract the IPA phonemes the user has actually mapped, deduplicated so that
+  // glyphs sharing a phoneme don't inflate that phoneme's selection probability
+  const availablePhonemes = [
+    ...new Set(
+      activeAlphabet.glyphs
+        .filter((g) => g.phonemes && g.phonemes.length > 0)
+        .flatMap((g) => g.phonemes)
+    ),
+  ];
 
   if (availablePhonemes.length === 0) return [];
 
   // Get weights filtered to only what the user has mapped
   const weightMap = getFilteredPhonemeWeights(languageProfile, availablePhonemes);
 
-  const { syllableTemplates } = languageProfile;
+  const { syllableTemplates, onsetClusterMode = "sonorant" } = languageProfile;
   const words = [];
   const seen = new Set(); // prevent duplicates
   let attempts = 0;
@@ -147,7 +188,7 @@ export function generateLexicon(activeAlphabet, languageProfile, wordCount) {
 
   while (words.length < wordCount && attempts < maxAttempts) {
     attempts++;
-    const phonemes = generateWord(weightMap, availablePhonemes, syllableTemplates);
+    const phonemes = generateWord(weightMap, availablePhonemes, syllableTemplates, onsetClusterMode);
     if (!phonemes) continue;
 
     const key = phonemes.join("-");

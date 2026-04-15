@@ -47,6 +47,8 @@ export const LANGUAGE_PROFILES = [
       "p":  0.015, "ŋ":  0.013, "ʃ":  0.010, "j":  0.009,
       "tʃ": 0.007, "dʒ": 0.006, "θ":  0.006, "ʒ":  0.002,
     },
+    // "sonorant": second onset C must be a liquid/glide (bl, br, tr, fl, etc.)
+    onsetClusterMode: "sonorant",
     syllableTemplates: [
       "CV", "CV", "CV",
       "CVC", "CVC", "CVC", "CVC",
@@ -110,6 +112,8 @@ export const LANGUAGE_PROFILES = [
       "w":  0.009, "χ":  0.008, "ð":  0.007, "θ":  0.006,
       "ʁ":  0.005,
     },
+    // Arabic does allow consonant clusters — "free" permits any two consonants
+    onsetClusterMode: "free",
     syllableTemplates: [
       "CVC", "CVC", "CVC", "CVC",
       "CV", "CV",
@@ -196,6 +200,8 @@ export const LANGUAGE_PROFILES = [
       "ʃ":  0.012, "tʃ": 0.010, "ʒ":  0.008, "ɲ":  0.006,
       "ʔ":  0.004,
     },
+    // Russian has true free onset clusters (zdr-, vstr-, skv-, etc.)
+    onsetClusterMode: "free",
     syllableTemplates: [
       "CVC", "CVC", "CVC",
       "CV", "CV",
@@ -325,22 +331,40 @@ export function getLanguageProfileSummaries() {
  * @returns {Object} - { [phoneme]: weight } normalized to sum to 1.0
  */
 export function getFilteredPhonemeWeights(profile, availablePhonemes) {
-  const available = new Set(availablePhonemes);
+  const unique = [...new Set(availablePhonemes)];
 
-  // Keep only weights for phonemes the user has mapped
-  const filtered = Object.entries(profile.phonemeWeights)
-    .filter(([phoneme]) => available.has(phoneme))
-    .reduce((acc, [phoneme, weight]) => {
-      acc[phoneme] = weight;
-      return acc;
-    }, {});
+  // Find profile weights for phonemes the user has mapped
+  let matchedTotal = 0;
+  const matched = {};
+  for (const [phoneme, weight] of Object.entries(profile.phonemeWeights)) {
+    if (unique.includes(phoneme)) {
+      matched[phoneme] = weight;
+      matchedTotal += weight;
+    }
+  }
+
+  // If there is no overlap at all, give every user phoneme equal weight
+  if (matchedTotal === 0) {
+    const w = 1 / unique.length;
+    return Object.fromEntries(unique.map((p) => [p, w]));
+  }
+
+  // Phonemes the user has that aren't in the profile still get a floor weight
+  // so all glyphs appear in generated output. Floor is 30% of uniform (1/N),
+  // keeping unmatched phonemes clearly less common than profile-characteristic
+  // ones but still visible. Using uniform-relative floor rather than a
+  // profile-weight-relative floor avoids near-zero floors when profile has
+  // low-weight phonemes (e.g. /ʒ/ = 0.002 in English).
+  const floor = (1 / unique.length) * 0.3;
+
+  const result = {};
+  for (const phoneme of unique) {
+    result[phoneme] = matched[phoneme] ?? floor;
+  }
 
   // Normalize so weights sum to 1.0
-  const total = Object.values(filtered).reduce((sum, w) => sum + w, 0);
-
-  if (total === 0) return {};
-
+  const total = Object.values(result).reduce((s, w) => s + w, 0);
   return Object.fromEntries(
-    Object.entries(filtered).map(([phoneme, weight]) => [phoneme, weight / total])
+    Object.entries(result).map(([p, w]) => [p, w / total])
   );
 }
