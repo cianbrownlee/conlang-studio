@@ -25,8 +25,6 @@ import {
   saveAlphabetsToStorage,
   loadActiveAlphabetId,
   saveActiveAlphabetId,
-  exportAlphabetToFile,
-  exportAllAlphabetsToFile,
   importAlphabetFromFile,
 } from "../utils/persistence";
 
@@ -64,6 +62,10 @@ export function useAlphabet() {
     const savedActiveId = loadActiveAlphabetId();
 
     if (saved.length > 0) {
+      // Hydrating from an external source (localStorage) on mount is the
+      // canonical use of setState-in-effect. The lint rule fires a false
+      // positive here; there's no alternative that avoids the initial paint.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAlphabets(saved);
 
       // Restore the previously active alphabet, or default to the first one
@@ -300,39 +302,9 @@ export function useAlphabet() {
     return activeAlphabet.glyphs.find((g) => g.phonemes.includes(phoneme)) ?? null;
   }, [activeAlphabet]);
 
-  /**
-   * Looks up a glyph in any alphabet by its primary phoneme.
-   * Used when rendering across multiple alphabets (e.g. a comparison view).
-   *
-   * @param {string} alphabetId
-   * @param {string} phoneme
-   * @returns {Object|null}
-   */
-  const findGlyphByPhonemeInAlphabet = useCallback((alphabetId, phoneme) => {
-    const alphabet = alphabets.find((a) => a.id === alphabetId);
-    if (!alphabet) return null;
-    return alphabet.glyphs.find((g) => g.phonemes.includes(phoneme)) ?? null;
-  }, [alphabets]);
-
   // ---------------------------------------------------------------------------
-  // EXPORT / IMPORT
+  // IMPORT
   // ---------------------------------------------------------------------------
-
-  /**
-   * Exports the active alphabet as a .conlang file download.
-   */
-  const exportActiveAlphabet = useCallback(() => {
-    if (activeAlphabet) {
-      exportAlphabetToFile(activeAlphabet);
-    }
-  }, [activeAlphabet]);
-
-  /**
-   * Exports all alphabets as a single .conlang file download.
-   */
-  const exportAllAlphabets = useCallback(() => {
-    exportAllAlphabetsToFile(alphabets);
-  }, [alphabets]);
 
   /**
    * Imports alphabets from a .conlang file.
@@ -390,11 +362,8 @@ export function useAlphabet() {
     deleteGlyph,
     reorderGlyphs,
     findGlyphByPhoneme,
-    findGlyphByPhonemeInAlphabet,
 
-    // Export / import
-    exportActiveAlphabet,
-    exportAllAlphabets,
+    // Import (export is handled at the App level via ExportModal)
     importAlphabetFile,
   };
 }

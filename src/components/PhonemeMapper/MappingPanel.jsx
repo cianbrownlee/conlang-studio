@@ -4,7 +4,7 @@
 import { useRef, useState } from "react";
 import GlyphRenderer from "../shared/GlyphRenderer";
 
-export default function MappingPanel({ glyphs, alphabetId, selectedGlyphId, onSelectGlyph, onAssignPhonemes, onReorderGlyphs, glyphSize = 72 }) {
+export default function MappingPanel({ glyphs, alphabetId, selectedGlyphId, onSelectGlyph, onReorderGlyphs, glyphSize = 72 }) {
   const dragSrcId = useRef(null);
   const [draggingId, setDraggingId] = useState(null);
   // { id: string, before: bool } — which card is being hovered and which half

@@ -6,9 +6,7 @@ import GlyphLibrary from "./GlyphLibrary";
 import DrawingModal from "./DrawingModal";
 
 export default function AlphabetBuilder({
-  activeAlphabet,
   alphabets,
-  activeAlphabetId,
   onSwitchAlphabet,
   onCreateAlphabet,
   onRenameAlphabet,
@@ -17,8 +15,7 @@ export default function AlphabetBuilder({
   onUpdateGlyphImage,
   onDeleteGlyph,
   onReorderGlyphs,
-  onExportActiveAlphabet,
-  onExportAllAlphabets,
+  onExportAlphabet,
   onImportAlphabetFile,
 }) {
   // All alphabets start expanded
@@ -88,10 +85,8 @@ export default function AlphabetBuilder({
   }
 
   function handleExport(alphabet) {
-    // Switch to target alphabet, then export the active one
-    onSwitchAlphabet(alphabet.id);
-    // exportActiveAlphabet reads activeAlphabet from state — give React one tick
-    setTimeout(onExportActiveAlphabet, 0);
+    // Export the specific alphabet directly — no need to switch active state first.
+    onExportAlphabet(alphabet);
   }
 
   function handleImportChange(e) {

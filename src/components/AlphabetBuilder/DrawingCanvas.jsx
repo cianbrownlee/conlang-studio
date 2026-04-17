@@ -28,7 +28,13 @@ export default function DrawingCanvas({ initialImage, onSave, onClear }) {
     strokeHistoryRef.current = [];
     linePhaseRef.current = null;
     lineStartRef.current = null;
-    clearSnapIndicator();
+
+    // Clear the indicator overlay (inlined to avoid the hooks plugin flagging
+    // the access of a function declared later in the component body).
+    const indicator = indicatorCanvasRef.current;
+    if (indicator) {
+      indicator.getContext("2d").clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    }
 
     if (initialImage) {
       const img = new Image();

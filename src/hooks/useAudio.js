@@ -49,10 +49,14 @@ export function useAudio() {
    * Returns a promise that resolves to the Audio element, or null if the file
    * doesn't exist or can't be loaded.
    *
+   * Wrapped in useCallback so callers (playPhoneme / preloadPhonemes) can
+   * include it in their dep arrays without churning on every render. Only
+   * touches refs and pure module-level helpers, so empty deps are safe.
+   *
    * @param {string} symbol
    * @returns {Promise<HTMLAudioElement|null>}
    */
-  async function loadAudio(symbol) {
+  const loadAudio = useCallback(async (symbol) => {
     // Return cached version if available
     if (audioCache.current[symbol]) {
       return audioCache.current[symbol];
@@ -76,7 +80,7 @@ export function useAudio() {
 
       audio.load();
     });
-  }
+  }, []);
 
   /**
    * Fallback: uses the Web Speech API to speak the phoneme's description word
@@ -130,7 +134,7 @@ export function useAudio() {
     } finally {
       setLoadingSymbol(null);
     }
-  }, []);
+  }, [loadAudio]);
 
   /**
    * Preloads audio files for a list of IPA symbols.
@@ -144,7 +148,7 @@ export function useAudio() {
       // Fire and forget — errors are handled inside loadAudio
       loadAudio(symbol);
     });
-  }, []);
+  }, [loadAudio]);
 
   /**
    * Clears the audio cache. Useful if audio files are updated.

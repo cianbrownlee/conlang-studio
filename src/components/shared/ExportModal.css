@@ -1,0 +1,248 @@
+/**
+ * ExportModal.css
+ * Styles for the export modal — backdrop, container, tab bar, download panel,
+ * and the syntax-highlighted JSON preview pane.
+ */
+
+/* ---------------------------------------------------------------------------
+   BACKDROP + CONTAINER
+--------------------------------------------------------------------------- */
+
+.export-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(2px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.export-modal {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 540px;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------------------------------------------------------------------------
+   HEADER
+--------------------------------------------------------------------------- */
+
+.export-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--color-border-subtle);
+  flex-shrink: 0;
+}
+
+.export-modal__title {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: normal;
+  color: var(--color-text-primary);
+}
+
+.export-modal__close {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+  line-height: 1;
+}
+
+.export-modal__close:hover {
+  color: var(--color-text-primary);
+}
+
+/* ---------------------------------------------------------------------------
+   TAB BAR
+--------------------------------------------------------------------------- */
+
+.export-modal__tabs {
+  display: flex;
+  padding: 0 var(--space-6);
+  border-bottom: 1px solid var(--color-border-subtle);
+  flex-shrink: 0;
+}
+
+.export-modal__tab {
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.export-modal__tab:hover {
+  color: var(--color-text-secondary);
+}
+
+.export-modal__tab--active {
+  color: var(--color-accent);
+  border-bottom-color: var(--color-accent);
+}
+
+/* ---------------------------------------------------------------------------
+   BODY (shared scroll container)
+--------------------------------------------------------------------------- */
+
+.export-modal__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6);
+}
+
+/* ---------------------------------------------------------------------------
+   DOWNLOAD PANEL
+--------------------------------------------------------------------------- */
+
+.export-modal__meta {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-5);
+}
+
+.export-modal__section {
+  margin-bottom: var(--space-5);
+}
+
+.export-modal__label {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+
+/* Format toggle — two side-by-side cards */
+.export-modal__format-toggle {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.export-modal__format-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  color: var(--color-text-secondary);
+  background: transparent;
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.export-modal__format-btn:hover {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-primary);
+}
+
+.export-modal__format-btn--active {
+  border-color: var(--color-accent-dim);
+  color: var(--color-accent);
+  background: rgba(201, 168, 76, 0.06);
+}
+
+.export-modal__format-note {
+  font-size: 0.63rem;
+  font-family: var(--font-sans);
+  color: var(--color-text-muted);
+  letter-spacing: 0.03em;
+}
+
+.export-modal__format-btn--active .export-modal__format-note {
+  color: var(--color-accent-dim);
+}
+
+/* Action buttons row */
+.export-modal__actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.export-modal__action-btn {
+  flex: 1;
+}
+
+.export-modal__warning {
+  margin-top: var(--space-3);
+  font-size: 0.73rem;
+  color: var(--color-text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   PREVIEW PANEL
+--------------------------------------------------------------------------- */
+
+.export-modal__preview-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.export-modal__preview-note {
+  font-size: 0.73rem;
+  color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-raised);
+  border-radius: var(--radius-sm);
+  border-left: 2px solid var(--color-accent-dim);
+  line-height: 1.5;
+}
+
+/* The scrollable code block */
+.export-preview {
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 0.71rem;
+  line-height: 1.65;
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 420px;
+  color: var(--color-text-secondary);
+  white-space: pre;
+}
+
+/* Syntax highlighting token colours */
+.export-preview__key {
+  color: #7db9e8;  /* blue — property names */
+}
+
+.export-preview__string {
+  color: #a8c080;  /* green — string values */
+}
+
+.export-preview__number {
+  color: #e8a870;  /* orange — numbers */
+}
+
+.export-preview__keyword {
+  color: #c888d8;  /* purple — true / false / null */
+}

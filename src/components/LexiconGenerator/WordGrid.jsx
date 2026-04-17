@@ -3,7 +3,7 @@
 import GlyphRenderer from "../shared/GlyphRenderer";
 import { convertIPAToLatin } from "../../utils/phonetics";
 
-export default function WordGrid({ wordList, glyphs, findGlyphByPhoneme }) {
+export default function WordGrid({ wordList, findGlyphByPhoneme }) {
   if (wordList.length === 0) {
     return (
       <div className="word-grid word-grid--empty">

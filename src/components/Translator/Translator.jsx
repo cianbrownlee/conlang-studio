@@ -35,7 +35,7 @@ export default function Translator({
     try {
       const result = convertTextToPhonemes(inputText);
       setTranslationResult(result);
-    } catch (err) {
+    } catch {
       setError("Translation failed. Please check your input and try again.");
       setTranslationResult(null);
     } finally {

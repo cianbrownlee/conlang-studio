@@ -44,7 +44,6 @@ export default function PhonemeMapper({
   onUpdateGlyphPhonemes,
   onReorderGlyphs,
   onExportActiveAlphabet,
-  onExportAllAlphabets,
   onImportAlphabetFile,
   // Lifted state for persistence across tab switches
   browseMode,
@@ -180,7 +179,6 @@ export default function PhonemeMapper({
             alphabetId={activeAlphabetId}
             selectedGlyphId={selectedGlyphId}
             onSelectGlyph={handleSelectGlyph}
-            onAssignPhonemes={onUpdateGlyphPhonemes}
             onReorderGlyphs={onReorderGlyphs}
             glyphSize={browseMode === "ipa" ? 96 : 72}
           />

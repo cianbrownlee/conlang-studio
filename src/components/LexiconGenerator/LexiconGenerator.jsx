@@ -121,7 +121,6 @@ export default function LexiconGenerator({
 
       <WordGrid
         wordList={wordList}
-        glyphs={activeAlphabet?.glyphs ?? []}
         findGlyphByPhoneme={findGlyphByPhoneme}
       />
 

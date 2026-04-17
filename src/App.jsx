@@ -24,6 +24,7 @@ import AlphabetBuilderScreen from "./components/AlphabetBuilder/AlphabetBuilder"
 import PhonemMapperScreen from "./components/PhonemeMapper/PhonemeMapper";
 import LexiconGeneratorScreen from "./components/LexiconGenerator/LexiconGenerator";
 import TranslatorScreen from "./components/Translator/Translator";
+import ExportModal from "./components/shared/ExportModal";
 import "./App.css";
 
 // ---------------------------------------------------------------------------
@@ -59,6 +60,7 @@ const TABS = [
 // ---------------------------------------------------------------------------
 
 export default function App() {
+  // Navigation
   const [activeTab, setActiveTab] = useState("builder");
 
   // Cross-tab persistent UI state — lives here so it survives tab switches
@@ -70,9 +72,30 @@ export default function App() {
   const [lexiconWordList, setLexiconWordList] = useState([]);
   const [lexiconTextSample, setLexiconTextSample] = useState([]);
 
+  // Export modal — `alphabets` is the set to export, `title` is the modal heading.
+  const [exportModal, setExportModal] = useState({ open: false, alphabets: [], title: "" });
+
+  /** Opens the export modal with the given alphabets and heading. */
+  function openExportModal(alphabetsToExport, title) {
+    setExportModal({ open: true, alphabets: alphabetsToExport, title });
+  }
+
+  /** Closes the export modal (preserves payload so the close animation, if any, has data). */
+  function closeExportModal() {
+    setExportModal((prev) => ({ ...prev, open: false }));
+  }
+
   // All alphabet state and operations come from this single hook instance.
   // Everything below receives what it needs as props.
   const alphabetHook = useAlphabet();
+
+  /** Opens the modal for exporting every alphabet in one file. */
+  function openExportAll() {
+    openExportModal(
+      alphabetHook.alphabets,
+      `Export all alphabets (${alphabetHook.alphabets.length})`
+    );
+  }
 
   // ---------------------------------------------------------------------------
   // SCREEN ROUTER
@@ -90,8 +113,13 @@ export default function App() {
       onCreateAlphabet: alphabetHook.createAlphabet,
       onRenameAlphabet: alphabetHook.renameAlphabet,
       onDeleteAlphabet: alphabetHook.deleteAlphabet,
-      onExportActiveAlphabet: alphabetHook.exportActiveAlphabet,
-      onExportAllAlphabets: alphabetHook.exportAllAlphabets,
+      onExportActiveAlphabet: () => {
+        const active = alphabetHook.activeAlphabet;
+        if (active) openExportModal([active], `Export "${active.name}"`);
+      },
+      onExportAlphabet: (alphabet) => {
+        openExportModal([alphabet], `Export "${alphabet.name}"`);
+      },
       onImportAlphabetFile: alphabetHook.importAlphabetFile,
     };
 
@@ -223,7 +251,7 @@ export default function App() {
             {hasAlphabets && (
               <button
                 className="button button--ghost"
-                onClick={alphabetHook.exportAllAlphabets}
+                onClick={openExportAll}
                 title="Save all alphabets as a .conlang file"
               >
                 Export all
@@ -254,6 +282,14 @@ export default function App() {
       <main className="app__main">
         {hasAlphabets ? renderActiveScreen() : renderEmptyState()}
       </main>
+
+      {/* ── Export Modal ── */}
+      <ExportModal
+        isOpen={exportModal.open}
+        onClose={closeExportModal}
+        alphabets={exportModal.alphabets}
+        title={exportModal.title}
+      />
 
     </div>
   );

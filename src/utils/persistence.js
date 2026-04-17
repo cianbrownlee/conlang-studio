@@ -98,26 +98,35 @@ export function clearAllStorage() {
 // ---------------------------------------------------------------------------
 
 /**
- * Exports a single alphabet as a downloadable .conlang JSON file.
- * Triggers a browser file download — no server involved.
+ * Builds the JSON payload object that's written to an export file.
+ * A one-alphabet array produces a `{ ...base, alphabet }` shape;
+ * a multi-alphabet array produces `{ ...base, alphabets }`.
  *
- * @param {Object} alphabet - The alphabet object to export
+ * @param {Array} alphabets - alphabets to include in the payload
+ * @returns {Object}
  */
-export function exportAlphabetToFile(alphabet) {
-  const payload = {
-    formatVersion: FORMAT_VERSION,
-    exportedAt: new Date().toISOString(),
-    alphabet,
-  };
+export function buildExportPayload(alphabets) {
+  const base = { formatVersion: FORMAT_VERSION, exportedAt: new Date().toISOString() };
+  return alphabets.length === 1
+    ? { ...base, alphabet: alphabets[0] }
+    : { ...base, alphabets };
+}
 
+/**
+ * Triggers a browser download of a JSON payload under the given filename.
+ * Caller is responsible for choosing the extension (.conlang, .json, etc.).
+ *
+ * @param {Object} payload - any JSON-serialisable value
+ * @param {string} filename - filename including extension
+ */
+export function triggerJSONDownload(payload, filename) {
   const json = JSON.stringify(payload, null, 2);
   const blob = new Blob([json], { type: "application/json" });
   const url = URL.createObjectURL(blob);
 
-  // Create a temporary anchor element to trigger the download
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = sanitizeFilename(alphabet.name) + FILE_EXTENSION;
+  anchor.download = filename;
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);
@@ -126,32 +135,8 @@ export function exportAlphabetToFile(alphabet) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/**
- * Exports all alphabets as a single downloadable .conlang JSON file.
- * Useful as a full backup.
- *
- * @param {Array} alphabets - The full array of alphabet objects
- */
-export function exportAllAlphabetsToFile(alphabets) {
-  const payload = {
-    formatVersion: FORMAT_VERSION,
-    exportedAt: new Date().toISOString(),
-    alphabets,
-  };
-
-  const json = JSON.stringify(payload, null, 2);
-  const blob = new Blob([json], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = "all_alphabets" + FILE_EXTENSION;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
+// Re-export the default extension so callers can build filenames consistently.
+export const CONLANG_FILE_EXTENSION = FILE_EXTENSION;
 
 // ---------------------------------------------------------------------------
 // FILE IMPORT
@@ -183,7 +168,7 @@ export function importAlphabetFromFile(file) {
         const parsed = JSON.parse(event.target.result);
         const validated = validateImportedFile(parsed);
         resolve(validated);
-      } catch (error) {
+      } catch {
         reject(new Error("This file could not be read. Make sure it is a valid .conlang file."));
       }
     };
@@ -263,14 +248,19 @@ function validateAlphabet(alphabet) {
  * Converts an alphabet name into a safe filename by removing characters
  * that are invalid in filenames across Windows, Mac, and Linux.
  *
- * @param {string} name - The raw alphabet name
+ * @param {string} name - The raw alphabet name (may be null/empty)
  * @returns {string} - A safe filename string (without extension)
  */
-function sanitizeFilename(name) {
-  return name
-    .replace(/[<>:"/\\|?*\x00-\x1f]/g, "") // remove invalid characters
-    .replace(/\s+/g, "_")                    // replace spaces with underscores
-    .replace(/^\.+/, "")                     // remove leading dots
-    .slice(0, 64)                            // cap length
-    || "my_alphabet";                        // fallback if name is empty after sanitizing
+export function sanitizeFilename(name) {
+  if (!name) return "my_alphabet";
+  return (
+    name
+      // Control chars are intentional — they're invalid in filenames and must be stripped.
+      // eslint-disable-next-line no-control-regex
+      .replace(/[<>:"/\\|?*\x00-\x1f]/g, "") // remove invalid characters
+      .replace(/\s+/g, "_")                    // replace spaces with underscores
+      .replace(/^\.+/, "")                     // remove leading dots
+      .slice(0, 64)                            // cap length
+      || "my_alphabet"                         // fallback if name is empty after sanitizing
+  );
 }
